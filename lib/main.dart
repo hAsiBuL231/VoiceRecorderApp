@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:voice_recorder_app/features/recording/presentation/recording_page.dart';
 import 'core/di/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'features/home_screen.dart';
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Voice Recorder App',
       theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+      home: const RecordingPage(),
     );
   }
 }

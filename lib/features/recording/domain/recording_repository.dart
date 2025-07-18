@@ -1,5 +1,5 @@
-import '../../../model/records.dart';
+import 'recording_entity.dart';
 
 abstract class RecordingRepository {
-  Future<void> saveRecord(Records record);
+  Future<void> saveRecord(RecordingEntity record);
 }
