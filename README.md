@@ -7,7 +7,11 @@ A simple and efficient Flutter voice recorder application with a clean, modern U
 - Record audio with amplitude visualization
 - List and playback recordings
 - Playback speed control (1x, 1.5x, 2x)
-- Material Design 3 UI
+- Added haptic feedback for recording actions.
+- Swipe-to-delete functionality for recordings with confirmation dialog.
+- Loading indicator for audio operations in the PlayerScreen.
+- Enhanced theming with Material 3 design principles.
+- Displayed recording metadata (date/time and duration).
 
 ## Architecture
 

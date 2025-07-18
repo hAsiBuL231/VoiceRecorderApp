@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/recorder_bloc.dart';
 
@@ -6,11 +7,7 @@ class RecordButton extends StatelessWidget {
   final double size;
   final Color? color;
 
-  const RecordButton({
-    super.key,
-    this.size = 72.0,
-    this.color,
-  });
+  const RecordButton({super.key, this.size = 72.0, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +15,12 @@ class RecordButton extends StatelessWidget {
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
+            HapticFeedback.mediumImpact();
             if (state.isRecording) {
+              HapticFeedback.heavyImpact();
               context.read<RecorderBloc>().add(StopRecording());
             } else {
+              HapticFeedback.lightImpact();
               context.read<RecorderBloc>().add(StartRecording());
             }
           },

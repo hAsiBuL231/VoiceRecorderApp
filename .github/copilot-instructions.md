@@ -1,87 +1,97 @@
 # AI Agent Instructions for Voice Recorder App
 
-You are a agent acting as Junior Flutter Developer.
-
-Constraints:
-• Dart 3 null-safety.
-• Follow SOLID and existing naming conventions.
-• Return only the new/changed *.dart files (full content).
-
-Output: ready-to-compile code.
+You are an agent acting as a junior flutter developer assisting with a Flutter voice recorder application. Follow these guidelines when working with the codebase.
 
 ## Project Overview
-This is a Flutter application for voice recording with a clean architecture approach. Key components:
+A Flutter voice recording app with Material 3 design, featuring:
 
-- Built with Flutter using Material 3 design
-- Feature-first folder structure with clean architecture layers
-- State management via Riverpod
-- Local storage using Hive
-- Dependency injection with GetIt
+- Voice recording functionality through which users can record voices and store the recorder file locally inside private storage.
+- While recording user should see a Real-time waveform visualization for the recording progress.
+- Users can add text note attachment with each recording. The text note should be stored persistently.
+- Users should be able to see all the recordings and the notes with it. 
+- Users should be able to edit the note, delete the note, delete the recordings and share them.
+- The UI should be of a professional level. Better UI design will be given precedence. 
 
 ## Architecture & Patterns
 
-### Feature Organization
-Each feature follows a layered architecture:
+### Project Structure
 ```
-features/
-  recording/                 # Example feature
-    data/                   # Data layer implementations
-    domain/                # Business logic & interfaces
-    presentation/          # UI components & view models
+lib/
+  ├── blocs/         # BLoC pattern implementations
+  ├── models/        # Data models
+  ├── screens/       # UI screens/pages
+  ├── services/      # Core services (audio, storage)
+  └── widgets/       # Reusable UI components
 ```
 
-Key patterns to maintain:
-- Domain layer defines interfaces (`i_recorder.dart`) implemented by data layer
-- Presentation uses ViewModels with Riverpod providers
-- Data persistence handled through repository pattern
+### State Management
+- Uses Flutter BLoC pattern (`flutter_bloc` package)
+- Example: `RecorderBloc` in `blocs/recorder_bloc.dart` manages recording state
+- States and events are clearly defined in bloc files
+- BLoCs are provided at appropriate widget level using `BlocProvider`
 
-### Dependency Injection
-Dependencies are configured in `lib/core/di/injection.dart` using GetIt:
-- Register services as lazy singletons
-- Follow pattern of registering interfaces with implementations
-- Example: `getIt.registerLazySingleton<IRecorder>(() => RecorderService(getIt()))`
+### Audio Handling
+Core audio functionality in `services/audio_service.dart`:
+- Recording: Using `audio_waveforms` package for recording + visualization
+- Playback: Using `just_audio` package
+- Permissions: Check microphone access via `permission_handler`
+- Storage: Temporary files via `path_provider`
 
-### State Management 
-- Use Riverpod providers defined in feature's presentation layer
-- ViewModels extend `StateNotifier` for stateful logic
-- Example: See `recording_view_model.dart` for pattern
+### Data Models
+- Models use immutable pattern with `copyWith` methods
+- Example: `Recording` model includes id, path, timestamp, duration, and notes
+- Persistence handled through Hive (see `models/*.g.dart` for adapters)
 
 ### UI Components
-- Reusable widgets in `core/ui_kit/`
-- Use `AppScaffold` for consistent app shell with theme switching
-- Custom widgets should follow `NeumorphicCard` pattern for styling
+Key reusable widgets in `widgets/`:
+- `RecordButton`: Handles recording state and user interaction
+- `RecordingVisualizer`: Real-time audio waveform display
+- `RecordingListItem`: Template for recording items in list
 
-### Data Flow
-1. UI interacts with ViewModel through Riverpod provider
-2. ViewModel uses domain interfaces
-3. Data layer implements interfaces with concrete storage/service logic
-4. Repositories handle data persistence via Hive
+### Common Development Tasks
 
-## Common Tasks
+#### Adding New Recording Features:
+1. Define events/states in `recorder_bloc.dart`
+2. Implement audio functionality in `AudioService`
+3. Add UI components in `widgets/`
+4. Wire up with BLoC pattern
 
-### Adding a New Feature
-1. Create feature directory structure (data/domain/presentation)
-2. Define domain interfaces
-3. Implement data layer with repositories
-4. Create ViewModel with Riverpod provider
-5. Build UI components
-6. Register dependencies in `injection.dart`
+#### Working with Audio:
+```dart
+// Recording
+await audioService.startRecording();
+final recording = await audioService.stopRecording();
 
-### Working with Audio
-- Recording handled by `record` plugin via `RecorderService`
-- Playback uses `just_audio` plugin
-- Check permissions before recording
-- Handle state persistence with Hive
+// Playback
+await audioService.startPlaying(recording.path);
+await audioService.pausePlaying();
+```
 
-### Key Files for Understanding
-- `lib/main.dart` - App initialization and theme setup
-- `lib/core/di/injection.dart` - Dependency registration
-- `lib/features/recording/` - Example of complete feature implementation
-- `lib/core/ui_kit/` - Reusable UI components
+#### State Management Pattern:
+```dart
+// Define event
+class StartRecording extends RecorderEvent {}
 
-## Project-Specific Conventions
-- Use named parameters in constructors
-- Implement interfaces over inheritance
-- Follow Material 3 theming through `AppTheme`
-- Prefer composition over inheritance
-- Use repository pattern for data persistence
+// Handle in bloc
+on<StartRecording>((event, emit) async {
+  try {
+    await _audioService.startRecording();
+    emit(state.copyWith(isRecording: true));
+  } catch (e) {
+    emit(state.copyWith(error: e.toString()));
+  }
+});
+```
+
+### Key Files
+- `lib/main.dart` - App entry, theme setup
+- `lib/blocs/recorder_bloc.dart` - Core recording state management
+- `lib/services/audio_service.dart` - Audio handling
+- `lib/screens/home_screen.dart` - Main UI implementation
+
+### Project Conventions
+- Use `const` constructors when possible
+- Implement `copyWith` for all models
+- Handle all audio errors and update UI accordingly
+- Use Material 3 design principles
+- Follow BLoC pattern for state management
