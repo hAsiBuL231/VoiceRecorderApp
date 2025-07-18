@@ -1,16 +1,39 @@
-# voice_recorder_app
+# Voice Recorder App
 
-A new Flutter project.
+A simple and efficient Flutter voice recorder application with a clean, modern UI.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Record audio with amplitude visualization
+- List and playback recordings
+- Playback speed control (1x, 1.5x, 2x)
+- Material Design 3 UI
 
-A few resources to get you started if this is your first Flutter project:
+## Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The app follows a simple and maintainable architecture using the BLoC pattern:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+lib/
+├── blocs/          # Business Logic Components
+├── models/         # Data models
+├── screens/        # UI screens
+├── services/       # Core services
+├── widgets/        # Reusable UI components
+└── main.dart
+```
+
+### Key Components
+
+- **BLoC Pattern**: Clean state management using flutter_bloc
+- **AudioService**: Unified service for recording and playback
+- **Reusable Widgets**: Modular components like RecordButton and RecordingListItem
+
+## Dependencies
+
+Core dependencies:
+- flutter_bloc: State management
+- record: Audio recording
+- just_audio: Audio playback
+- hive: Local storage
+- permission_handler: Microphone permissions

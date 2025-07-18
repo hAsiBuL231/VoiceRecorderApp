@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'core/di/injection.dart';
-import 'core/theme/app_theme.dart';
-import 'features/recording/presentation/recordings_list_page.dart';
+import 'blocs/recorder_bloc.dart';
+import 'screens/home_screen.dart';
+import 'services/audio_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  configureDependencies();
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -18,10 +17,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Voice Recorder App',
-      theme: AppTheme.lightTheme,
-      home: const RecordingsListPage(),
+      title: 'Voice Recorder',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      ),
+      home: BlocProvider(
+        create: (context) => RecorderBloc(AudioService()),
+        child: const HomeScreen(),
+      ),
     );
   }
 }
