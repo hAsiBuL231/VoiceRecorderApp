@@ -7,13 +7,16 @@ import 'package:voice_recorder_app/core/ui_kit/toaster.dart';
 
 import '../domain/i_recorder.dart';
 import '../domain/recording_entity.dart';
+import '../domain/recording_repository.dart';
 
 class RecorderService implements IRecorder {
   final AudioRecorder _record;
+  final RecordingRepository _repository;
   final Future<bool> Function() _requestPermission;
   late final Stream<double> _decibelStream;
+  DateTime? _startTime;
 
-  RecorderService({AudioRecorder? record, Future<bool> Function()? requestPermission})
+  RecorderService(this._repository, {AudioRecorder? record, Future<bool> Function()? requestPermission})
     : _record = record ?? AudioRecorder(),
       _requestPermission = requestPermission ?? _defaultPermissionRequest {
     _decibelStream = _record.onAmplitudeChanged(const Duration(milliseconds: 300)).map((amp) => amp.current);
@@ -40,6 +43,7 @@ class RecorderService implements IRecorder {
     print("\n \n Path: $path \n");
 
     await _record.start(config, path: path);
+    _startTime = DateTime.now();
   }
 
   @override
@@ -48,7 +52,16 @@ class RecorderService implements IRecorder {
     if (path == null) {
       throw StateError('No recording in progress');
     }
-    return RecordingEntity(path);
+    final start = _startTime ?? DateTime.now();
+    final entity = RecordingEntity(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      path: path,
+      createdAt: start,
+      duration: DateTime.now().difference(start),
+    );
+    await _repository.saveRecord(entity);
+    _startTime = null;
+    return entity;
   }
 
   @override
