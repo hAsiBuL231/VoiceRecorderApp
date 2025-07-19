@@ -66,11 +66,9 @@ class _TimerWidgetState extends State<TimerWidget> {
   Widget build(BuildContext context) {
     return Text(
       _formatDuration(_elapsed),
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontFamily: 'monospace',
-        fontWeight: FontWeight.w600,
-        color: Theme.of(context).colorScheme.primary,
-      ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontFamily: 'monospace', fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
     );
   }
 }

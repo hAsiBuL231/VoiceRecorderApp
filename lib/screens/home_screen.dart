@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/recorder_bloc.dart';
+import '../bloc/recorder_bloc.dart';
 import '../widgets/record_button.dart';
 import '../widgets/recording_list_item.dart';
 import '../widgets/recording_visualizer.dart';
@@ -17,9 +17,7 @@ class HomeScreen extends StatelessWidget {
       body: BlocConsumer<RecorderBloc, RecorderState>(
         listener: (context, state) {
           if (state.error != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error!)));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!)));
           }
         },
         builder: (context, state) {
@@ -31,21 +29,11 @@ class HomeScreen extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.mic_none,
-                              size: 64,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            Icon(Icons.mic_none, size: 64, color: Theme.of(context).colorScheme.primary),
                             const SizedBox(height: 16),
-                            Text(
-                              'No recordings yet',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
+                            Text('No recordings yet', style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 8),
-                            Text(
-                              'Tap the button below to start recording',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            Text('Tap the button below to start recording', style: Theme.of(context).textTheme.bodyMedium),
                           ],
                         ),
                       )
@@ -56,18 +44,10 @@ class HomeScreen extends StatelessWidget {
                           return RecordingListItem(
                             recording: recording,
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      PlayerScreen(recording: recording),
-                                ),
-                              );
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(recording: recording)));
                             },
                             onDelete: () {
-                              context.read<RecorderBloc>().add(
-                                DeleteRecording(recording.id),
-                              );
+                              context.read<RecorderBloc>().add(DeleteRecording(recording.id));
                             },
                           );
                         },
@@ -77,9 +57,7 @@ class HomeScreen extends StatelessWidget {
                 Card(
                   margin: const EdgeInsets.all(20),
                   elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -87,12 +65,7 @@ class HomeScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.1),
-                          Theme.of(context).colorScheme.surface,
-                        ],
+                        colors: [Theme.of(context).colorScheme.primary.withOpacity(0.1), Theme.of(context).colorScheme.surface],
                       ),
                     ),
                     child: Column(
@@ -100,19 +73,11 @@ class HomeScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.mic,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 24,
-                            ),
+                            Icon(Icons.mic, color: Theme.of(context).colorScheme.primary, size: 24),
                             const SizedBox(width: 8),
                             Text(
                               'Recording in progress...',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                             ),
                           ],
                         ),
@@ -122,18 +87,10 @@ class HomeScreen extends StatelessWidget {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.2),
-                              width: 1,
-                            ),
+                            border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2), width: 1),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: RecordingVisualizer(
-                            controller: context.read<RecorderBloc>().recorder,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                          child: RecordingVisualizer(controller: context.read<RecorderBloc>().recorder, color: Theme.of(context).colorScheme.primary),
                         ),
                       ],
                     ),
@@ -141,9 +98,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: RecordButton(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                child: RecordButton(color: Theme.of(context).colorScheme.primary),
               ),
             ],
           );

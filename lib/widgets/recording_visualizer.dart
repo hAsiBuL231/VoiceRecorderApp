@@ -5,11 +5,7 @@ class RecordingVisualizer extends StatelessWidget {
   final RecorderController controller;
   final Color color;
 
-  const RecordingVisualizer({
-    super.key,
-    required this.controller,
-    required this.color,
-  });
+  const RecordingVisualizer({super.key, required this.controller, required this.color});
 
   @override
   Widget build(BuildContext context) {

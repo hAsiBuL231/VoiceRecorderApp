@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/recorder_bloc.dart';
+import '../bloc/recorder_bloc.dart';
 
 class RecordButton extends StatelessWidget {
   final double size;
@@ -30,19 +30,9 @@ class RecordButton extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: color ?? Theme.of(context).primaryColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4))],
             ),
-            child: Icon(
-              state.isRecording ? Icons.stop : Icons.mic,
-              color: Colors.white,
-              size: size * 0.5,
-            ),
+            child: Icon(state.isRecording ? Icons.stop : Icons.mic, color: Colors.white, size: size * 0.5),
           ),
         );
       },

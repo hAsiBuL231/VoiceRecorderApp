@@ -30,8 +30,7 @@ class AudioService {
     }
 
     final dir = await getTemporaryDirectory();
-    _currentPath =
-        '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    _currentPath = '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
     await _recorder.record(path: _currentPath);
     _recordingStartTime = DateTime.now();
@@ -104,8 +103,7 @@ class AudioService {
   }
 
   // Additional streams for more detailed player state
-  Stream<ProcessingState> get processingStateStream =>
-      _player.processingStateStream;
+  Stream<ProcessingState> get processingStateStream => _player.processingStateStream;
   bool get playing => _player.playing;
 
   Future<void> dispose() async {
