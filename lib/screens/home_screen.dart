@@ -8,12 +8,25 @@ import '../widgets/timer_widget.dart';
 import 'player_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final ThemeMode themeMode;
+  final VoidCallback onToggleTheme;
+  const HomeScreen({super.key, required this.themeMode, required this.onToggleTheme});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Voice Recorder'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Voice Recorder'),
+        titleTextStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: themeMode == ThemeMode.light ? Colors.redAccent : Colors.greenAccent),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: 'Toggle theme',
+            icon: Icon(themeMode == ThemeMode.light ? Icons.dark_mode_rounded : Icons.light_mode_rounded),
+            onPressed: onToggleTheme,
+          ),
+        ],
+      ),
       body: BlocConsumer<RecorderBloc, RecorderState>(
         listener: (context, state) {
           if (state.error != null) {
@@ -39,8 +52,11 @@ class HomeScreen extends StatelessWidget {
                       )
                     : ListView.builder(
                         itemCount: state.recordings.length,
+                        shrinkWrap: true,
                         itemBuilder: (context, index) {
-                          final recording = state.recordings[index];
+                          final reversedIndex = state.recordings.length - 1 - index;
+
+                          final recording = state.recordings[reversedIndex];
                           return RecordingListItem(
                             recording: recording,
                             onTap: () {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/recording.dart';
 
 class RecordingListItem extends StatelessWidget {
@@ -6,68 +8,103 @@ class RecordingListItem extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
-  const RecordingListItem({super.key, required this.recording, required this.onTap, required this.onDelete});
+  RecordingListItem({super.key, required this.recording, required this.onTap, required this.onDelete});
 
   String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
-  }
+  final _dateFmt = DateFormat('EEE, d MMM yyyy ‣ h:mm a');
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key(recording.id),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) async {
-        return showDeleteConfirmationDialog(context);
-      },
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      onDismissed: (direction) {
-        onDelete();
-      },
-      child: Card(
-        elevation: 2,
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: ListTile(
-          onTap: onTap,
-          leading: const CircleAvatar(child: Icon(Icons.audio_file)),
-          title: Text(_formatDate(recording.createdAt)),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(_formatDuration(recording.duration)),
-              if (recording.note != null && recording.note!.trim().isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    recording.note!,
-                    style: TextStyle(color: Colors.grey[700], fontStyle: FontStyle.italic),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Dismissible(
+        key: Key(recording.id),
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (dir) async => showDeleteConfirmationDialog(context),
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [scheme.error, scheme.errorContainer], begin: Alignment.centerLeft, end: Alignment.centerRight),
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final confirmed = await showDeleteConfirmationDialog(context);
-              if (confirmed) {
-                onDelete();
-              }
-            },
+          child: Icon(Icons.delete_forever_rounded, color: scheme.onErrorContainer, size: 32),
+        ),
+        onDismissed: (_) => onDelete(),
+        child: Material(
+          color: scheme.surfaceContainerHighest, // subtle tint
+          elevation: 1.5,
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias, // for ripple & blur effects
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Leading icon with slight depth & color
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                    child: const Icon(Icons.play_arrow_rounded, size: 24),
+                  ),
+                  const SizedBox(width: 8),
+                  // Main info column (expands)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            // Date line
+                            Text(_dateFmt.format(recording.createdAt), style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.w600)),
+                            SizedBox(width: 6),
+                            // Duration chip
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(8)),
+                              child: Text(
+                                _formatDuration(recording.duration),
+                                style: Theme.of(context).textTheme.labelMedium!.copyWith(color: scheme.onSecondaryContainer),
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Optional note
+                        if (recording.note?.trim().isNotEmpty ?? false) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            recording.note!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            style: theme.textTheme.bodyMedium!.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Trailing overflow menu
+                  _MoreMenu(
+                    recording: recording,
+                    shareText: recording.note?.trim().isNotEmpty ?? false ? recording.note! : 'Recording ${recording.id}',
+                    onDelete: () async {
+                      if (await showDeleteConfirmationDialog(context)) onDelete();
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -75,18 +112,61 @@ class RecordingListItem extends StatelessWidget {
   }
 }
 
-Future<bool> showDeleteConfirmationDialog(context) async {
-  return await showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Delete Recording'),
-        content: const Text('Are you sure you want to delete this recording?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('CANCEL')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('DELETE')),
-        ],
-      );
+/// Three-dot overflow menu (currently only “Delete”, easy to expand later).
+enum _MenuItem { share, delete }
+
+class _MoreMenu extends StatelessWidget {
+  const _MoreMenu({required this.recording, required this.shareText, required this.onDelete});
+
+  final Recording recording;
+  final String shareText;
+  final Future<void> Function() onDelete;
+
+  @override
+  Widget build(BuildContext context) => PopupMenuButton<_MenuItem>(
+    icon: const Icon(Icons.more_vert_rounded),
+    onSelected: (value) async {
+      switch (value) {
+        case _MenuItem.share:
+          if (recording.path.isNotEmpty) {
+            await Share.shareXFiles([XFile(recording.path)], text: shareText);
+          } else {
+            await Share.share(shareText);
+          }
+          break;
+        case _MenuItem.delete:
+          await onDelete();
+          break;
+      }
     },
+    itemBuilder: (context) => const [
+      PopupMenuItem(
+        value: _MenuItem.share,
+        child: ListTile(leading: Icon(Icons.share_rounded), title: Text('Share')),
+      ),
+      PopupMenuItem(
+        value: _MenuItem.delete,
+        child: ListTile(leading: Icon(Icons.delete_outline_rounded), title: Text('Delete')),
+      ),
+    ],
   );
+}
+
+Future<bool> showDeleteConfirmationDialog(BuildContext context) async {
+  return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete recording?'),
+          content: const Text('This action cannot be undone. Proceed with delete?'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('CANCEL')),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('DELETE'),
+            ),
+          ],
+        ),
+      ) ??
+      false;
 }
